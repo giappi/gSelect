@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>TODO supply a title</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width">
+    </head>
+    <body>
+        <style scoped="">
+            #gSelect
+            {
+                font-family: 'Arial';
+                font-size: 14px;
+                width: 300px;
+                border: #dddddd dotted 0px;
+                padding: 0px;
+                //display: inline-block;
+                //position: fixed;
+                //top: 100px;
+                //left: 100px;
+            }
+            #alt_select
+            {
+                border: #aaaaaa solid 1px;
+                cursor: text;
+                //padding: 2px;
+                display: block;
+                float: left;
+                margin: 0;
+                width: 100%;
+                //padding: 2px;
+                
+                
+                
+            }
+
+            
+            .item
+            {
+                border: #ffaaaa solid 1px;
+                border-radius: 3px;
+                font-size: 14px;
+                background: #ffeeee;
+                cursor: text;
+                
+                margin: 3px;
+                float: left;
+                padding: 2px 2px 2px 2px;
+            }
+            
+            .clear_left
+            {
+                clear: left;
+            }
+            
+            #alt_input
+            {
+                background: transparent;
+                border: #ff0000 solid 0px;
+                padding-left: 1px;
+                padding-right: 1px;
+                margin-left: 0px;
+                margin-right: 0px;
+                text-align: left;
+            }
+
+            
+            .option
+            {
+                cursor: text;
+                border: #dddddd solid 1px;
+                border-left: 0px;
+                border-right: 0px;
+                border-top: 0;
+                padding: 2px;
+                margin: 0;
+                
+                line-height: 24px;
+                padding-left: 5px;
+                cursor: pointer;
+            }
+            
+            .option_selected
+            {
+                background: #d92e00;
+                color: #ffffff;
+            }
+            
+            #dropdown
+            {
+                background: #ffffff;
+                opacity: 0.9;
+                border: #808080 solid 1px;
+                width: 100%;
+                //max-height: 200px;
+                //overflow-y: auto;
+                //overflow-y: auto;
+                
+                margin-top: -1px;
+
+            }
+            
+            .dropdown_content
+            {
+                //width: 100%;
+                //height: 0px;
+                //overflow-y: visible;
+                //overflow-x: visible;
+            }
+            
+            .close
+            {
+                margin-left: 3px;
+                cursor: pointer;
+                padding: 3px;
+                margin-top: auto;
+                margin-bottom: auto;
+            }
+            
+            .key
+            {
+                display: none;
+            }
+            .seperate
+            {
+                display: none;
+            }
+            
+        </style>
+        
+        <select name="g[]" id="g" multiple="multiple" >
+            <option value="a" >A</option>
+            <option value="b" selected="selected" >B</option>
+            <option value="c" >C</option>
+            <option value="d" >D</option>
+        </select>
+        <br />
+        
+        <div class="gSelect" id="gSelect">
+            <div id="alt_select" class="select" >
+                <input id="alt_input" class="item" autocomplete="off" placeholder="" />
+            </div>
+            <div class="clear_left" ></div>
+            <div id="dropdown"></div>
+            <div style="float: left; display: none;" id="tmp_input"></div>
+        </div>
+        
+        <div id="debug">Debuger</div>
+        
+
+        
+        <script>
+            window.onload = function()
+            {
+                
+                $input  = document.getElementById("alt_input");
+                $dropdown = document.getElementById("dropdown");
+                $select = document.getElementById("alt_select");
+                
+                gSelect = function()
+                {
+                    that = this;
+                    var $gSelect = document.getElementById("gSelect");
+                    var $select = document.getElementById("alt_select");
+                    var $input  = document.getElementById("alt_input");
+                    var $dropdown = document.getElementById("dropdown");
+                    var $tmp_input = document.getElementById("tmp_input");
+                    var $debug = document.getElementById("debug");
+                    
+                    var $selectedIndex = 0;
+                    var $input_width = 3;
+                    var $selectedItem = [];
+                    var $timeout = 0;
+                    this.data = 
+                    {
+                        "a" : "Please",
+                        "b" : "don't",
+                        "c" : "say",
+                        "d" : "to",
+                        "e" : "somebody",
+                        "f" : "the",
+                        "g" : "password",
+                        "h" : "!"
+                    };
+                    
+                    this.setData = function(array)
+                    {
+                        this.data = array;
+                        this.init();
+                    };
+                    
+                    
+                    //get data from select tag
+                    this.setDataFromTagSelect = function(element)
+                    {
+                        var options = element.options;
+                        var data = Array();
+                        for( i = 0; i < options.length; i++)
+                        {
+                            data[options[i].value] = options[i].text;                            
+                        }
+                        this.setData(data);
+                        return data;
+                    };
+                            
+
+                    var KEY_BACKSPACE = 8;
+                    var KEY_ENTER = 13;
+                    var KEY_LEFT = 37;
+                    var KEY_UP = 38;
+                    var KEY_RIGHT = 39;
+                    var KEY_DOWN = 40;
+                    var KEY_DEL = 46;
+                    
+                    
+
+
+
+
+
+                    resizeInput = function()
+                    {
+
+                        $tmp_input.innerHTML = $input.value;
+                        $tmp_input.style.display = 'block';
+                        $input_width = $tmp_input.clientWidth;
+                        $tmp_input.style.display = 'none';
+                        //document.title = $input_width;
+                        $input.style.width = (3 + $input_width) + 'px';
+                    };
+
+
+
+
+                    relocateDropDown = function()
+                    {
+                        $dropdown.style.position = 'absolute';
+                        var rect = $gSelect.getBoundingClientRect();
+                        if(true)
+                        {
+                            $dropdown.style.top = Math.round( rect.top + rect.height) + 'px';
+                            $dropdown.style.left = Math.round( rect.left ) + 'px';
+                        }
+
+                        $dropdown.style.width = Math.round( rect.width ) + 'px'; 
+                    };
+                    
+                    function getKey(item)
+                    {
+                        return item.getAttribute("data-key");
+                    }
+                    
+                    this.getItemsSelected = function()
+                    {
+                        return $selectedItem;
+                    };
+                    
+                    
+                    function contains(key)
+                    {
+                        for(var k in $selectedItem)
+                        {
+                            if(k == key)
+                            {
+                                return true;
+                            }
+                        }
+                        return false;
+                    }
+
+
+                    refreshItem = function()
+                    {
+                        $selectedItem = [];
+                        var Items = $select.getElementsByTagName("div");
+
+                        for( var i = 0; i < Items.length; i++)
+                        {
+                            if(Items[i].className == "item")
+                            {
+                                $selectedItem[ getKey(Items[i]) ] = Items[i].getElementsByClassName("value")[0].innerHTML;
+                            }
+                        }
+
+                        //$dropdown.style.width = $select.clientWidth + 'px';
+                    };
+
+                    function addItem(item)
+                    {
+                        var div2 = document.createElement("div");
+                         div2.className = "item";
+                         div2.setAttribute( "data-key", item.getAttribute("data-key"));
+                         div2.innerHTML =  item.innerHTML;
+
+                         var close = document.createElement("span");
+                         close.className = "close";
+                         close.innerHTML = ('<img src="close0.png" />');
+                         close.onclick = function()
+                         {
+
+                             //alert(this.parentNode.getElementsByClassName("key")[0].innerHTML);
+                             this.parentNode.parentNode.removeChild(this.parentNode);
+                             relocateDropDown();
+                             refreshItem();
+                             refreshDropDown();
+                             showDropDown();
+                             
+                             $input.focus();
+
+                         };
+                         div2.appendChild(close);
+
+                         $input.parentNode.insertBefore( div2,  $input);
+
+                         $input.value = "";
+
+                         refreshItem();
+                         relocateDropDown();
+                         refreshDropDown();
+                         $input.focus();
+                         resizeInput();
+                    }
+                    
+                    function size(a)
+                    {
+                        var i = 0;
+                        for( var b in a)
+                        {
+                            i++;
+                        }
+                        //alert(i);
+                        return i;
+                    }
+                    
+                    dropDownSelecting = function()
+                    {
+                        var options = $dropdown.children;
+                        for(i = 0; i < options.length; i++)
+                        {
+                            
+                            if( i == $selectedIndex)
+                            {
+                                new Class(options[i]).addClass("option_selected");
+                            }
+                            else
+                            {
+                                new Class(options[i]).removeClass("option_selected");
+                            }
+                        }
+                        document.title = $selectedIndex;
+                    };
+
+                    refreshDropDown = function()
+                    {
+                        $dropdown.innerHTML = "";
+                        
+                        for (var i in that.data)
+                        {
+                            if( that.data[i].match($input.value, "ig"))
+                            {
+                                var div = document.createElement("div");
+                                div.className = "option";
+                                
+                                div.setAttribute("data-key", i);
+
+                                var key = document.createElement("span");
+                                key.className = "key";
+                                key.appendChild( document.createTextNode(i));
+                                var c = document.createElement("span");
+                                c.className = "seperate";
+                                c.appendChild( document.createTextNode("|"));
+                                var value = document.createElement("span");
+                                value.className = "value";
+                                value.appendChild( document.createTextNode(that.data[i]));
+
+
+
+
+
+                                div.onmousemove = function()
+                                {
+                                    //Get Selected Index
+                                    var j = 0;
+                                    var b = this;
+                                    while(b.previousElementSibling != null)
+                                    {
+                                        b = b.previousElementSibling;
+                                        j++;
+                                    }
+                                    $selectedIndex = j;
+                                    dropDownSelecting();
+                                };
+
+
+                                div.onmousedown = function()
+                                {
+                                    addItem(this);
+                                    clearTimeout($timeout);
+                                    //alert("c");
+                                };
+
+                                div.onmouseup = function()
+                                {
+                                    //input lost focus when using it
+                                    //addItem(this);
+                                };
+
+                                //404053288623;
+
+
+                                div.appendChild(key);
+                                div.appendChild(c);
+                                div.appendChild(value);
+                                $input.focus();
+                                if( !contains(i))
+                                {
+                                    $dropdown.appendChild(div);
+                                }
+                            }
+                        }
+                        
+                        $selectedIndex = 0;
+                        dropDownSelecting();
+                    };
+
+                    showDropDown = function()
+                    {
+                        $dropdown.style.display = 'block';
+                    };
+
+                    hideDropDown = function()
+                    {
+                        $dropdown.style.display = 'none';
+
+                    };
+
+                    deleteLeftItem = function()
+                    {
+                        lastItem = $input.previousElementSibling;
+                        if(lastItem != null)
+                        {
+                            $select.removeChild(lastItem);
+                            refreshItem();
+                            relocateDropDown();
+                        }
+                    };
+
+                    deleteRightItem = function()
+                    {
+                        lastItem = $input.nextElementSibling;
+                        if(lastItem != null)
+                        {
+                            $select.removeChild(lastItem);
+                            refreshItem();
+                            relocateDropDown();
+                        }
+                    };
+                    
+                    this.onblur = function()
+                    {
+                        $timeout = setTimeout( hideDropDown, 100);
+                    };
+
+                    this.onfocus = function()
+                    {
+                        if( $dropdown.hasChildNodes())
+                            showDropDown();
+                        clearTimeout($timeout);
+                    };
+                    
+
+                    this.onkeydown = function(e)
+                    {
+
+                        resizeInput();
+
+                        e = (e) ? e : ((event) ? e : null);
+                        //alert(e.keyCode); return;
+                        if($input.value != "")
+                        {
+                            return;
+                        }
+
+                        if(e.keyCode == KEY_BACKSPACE)
+                        {
+                            deleteLeftItem();
+                        }
+
+                        if(e.keyCode == KEY_DEL)
+                        {
+                            //if($size(that.data) > 0) // khi array co chi so mang la "key" thi length cua no = 0
+                            deleteRightItem();
+
+                        }
+
+                        if(e.keyCode == KEY_LEFT)
+                        {
+                             leftItem = $input.previousElementSibling;
+                             if(leftItem != null)
+                             {
+                                $debug.innerHTML = leftItem.toString();
+                                leftItem.parentNode.insertBefore($input, leftItem);
+                                //lost focus after insert
+                                $input.focus();
+                             }
+                        }
+
+                        if(e.keyCode == KEY_RIGHT)
+                        {
+                            rightItem = $input.nextElementSibling;
+                            if(rightItem != null)
+                            {
+                                $debug.innerHTML = rightItem.toString();
+                                $input.parentNode.insertBefore(rightItem, $input);
+                            }
+                        }
+
+                        if(e.keyCode == KEY_DOWN)
+                        {
+                            $selectedIndex ++;
+                            if($selectedIndex > $dropdown.children.length -1 )
+                                $selectedIndex = 0;
+                            if($selectedIndex < 0)
+                                $selectedIndex = $dropdown.children.length - 1;
+                            
+                            
+                            dropDownSelecting();
+                        }
+
+                        if(e.keyCode == KEY_UP)
+                        {
+                            $selectedIndex --;
+                            if($selectedIndex > $dropdown.children.length -1)
+                                $selectedIndex = 0;
+                            if($selectedIndex < 0)
+                                $selectedIndex = $dropdown.children.length - 1;
+
+                            dropDownSelecting();
+
+                        }
+
+                        if(e.keyCode == KEY_ENTER)
+                        {
+                            $d = $dropdown.children;
+                            for (i = 0; i < $d.length; i++)
+                            {
+                                if( i == $selectedIndex)
+                                {
+                                    addItem($d[i]);
+                                }
+                            }
+                        }
+                    };
+
+
+
+                    this.onkeyup = function(e)
+                    {
+                        //Neu cac phim duoc nhan khong phai la cac phim dieu khien
+                        if( 
+                                e.keyCode != KEY_UP &&
+                                e.keyCode != KEY_RIGHT &&
+                                e.keyCode != KEY_DOWN &&
+                                e.keyCode != KEY_LEFT
+                          )
+                  
+                        {
+                           
+                            resizeInput();
+                            refreshDropDown();
+                            relocateDropDown();
+                            if( $dropdown.hasChildNodes())
+                                showDropDown();
+                        }
+                    };
+                    
+
+                        $select.onclick = function()
+                        {
+                            $input.focus();
+                        };
+                        $dropdown.onmouseover = function()
+                        {
+                            clearTimeout($timeout);
+                        };
+
+                    //init
+                    this.init = function()
+                    {
+                        
+                        
+                        
+                        $dropdown.innerHTML = "";
+                        $select.innerHTML = "";
+                        
+                        
+                        
+                        $input = document.createElement("input");
+                        $input.id = "alt_input";
+                        $input.className = "item";
+                        $input.onblur = this.onblur;
+                        $input.onfocus = this.onfocus;
+                        $input.onkeyup = this.onkeyup;
+                        $input.onkeydown = this.onkeydown;
+                        $select.appendChild($input);
+                        
+                       
+                        $dropdown.style.display = 'none';
+                        $input.style.width = $input_width + 'px';
+                        refreshDropDown();
+                        relocateDropDown();
+                        dropDownSelecting();
+                        //alert(size(that.data));
+                    };
+                    
+                };
+                
+                
+                Class = function(e)
+                {
+                    
+                    this.addClass = function(c)
+                    {
+                        var oldClass = e.getAttribute("class");
+                        if(oldClass == null)
+                        {
+                            e.setAttribute("class", c);
+                        }
+                        else
+                        if( ! oldClass.match(c))
+                        {
+                            e.setAttribute("class", oldClass + " " + c);
+                        }
+                    };
+                    
+                    this.removeClass = function(c)
+                    {
+                        var oldClass = e.getAttribute("class");
+                        if(oldClass == null)
+                        {
+                            
+                        }
+                        else
+                        if( oldClass.match( " " + c))
+                        {
+                            e.setAttribute("class", oldClass.replace(" " + c, ""));
+                        }
+                        else
+                        if( oldClass.match(c + " "))
+                        {
+                            e.setAttribute("class", oldClass.replace(c + " ", ""));
+                        }
+                        else
+                        if( oldClass == c)
+                        {
+                            e.setAttribute("class", oldClass.replace(c, ""));
+                        }
+                    };
+                };
+                
+                
+
+
+                
+                
+                
+                $a = new gSelect();
+                
+                $a.init();
+                
+            };
+        </script>
+    </body>
+</html>

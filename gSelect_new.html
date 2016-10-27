@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>TODO supply a title</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width">
+        <script type="text/javascript" src="gSelect.js" ></script>
+        <link rel="stylesheet" href="gSelect.css" />
+        <style>
+            body
+            {
+                padding: 5px;
+            }
+            .select_container
+            {
+                border: 1px #ff0000 dotted;
+                padding: 5px;
+            }
+        </style>
+    </head>
+    <body>
+    <h1>gSelect</h1>
+    <form method="get" action="">
+        <div class="select_container" >
+        Single Select:<br />
+        <select id="select_id" placeholder="Hãy viết gì đó ..́" name="g" >
+            <option value="a"  >Tea</option>
+            <option value="b"  >Coffee</option>
+            <option value="c"  >Milk</option>
+            <option value="d" selected="selected" >Meat</option>
+            <option value="e"  >Beef</option>
+        </select>
+        </div>
+        <br />
+        <div class="select_container" >
+        Multiple Select: <br />
+        <select id="myid" placeholder="Hãy viết gì đó ..́" name="t[]" multiple >
+            <option value="a"  >Tea</option>
+            <option value="b" selected="selected" >Coffee</option>
+            <option value="c"  >Milk</option>
+            <option value="d" selected="selected" >Meat</option>
+            <option value="e"  >Beef</option>
+        </select>
+        </div>
+        <br />
+        </form>
+        <br />
+        <b>How to use:</b>
+        <br />
+        Replace by Id:<br />
+        <pre>
+        mySelect = new gSelect();
+        mySelect.replaceById("myid");
+        </pre><br />
+        Replace All: <br />
+        <pre>
+        mySelect = new gSelect();
+        mySelect.replaceAll();
+        </pre><br />
+        Edit:
+        <div style="width: 450px;" >
+        <textarea style="display:block; width: 450px; margin: auto auto">
+        mySelect = new gSelect();
+        mySelect.replaceById("myid");
+        </textarea>
+        <input style="display:block; width: 450px; margin: auto auto" type="button" value="Run yourself" onclick="eval(this.previousElementSibling.value); this.value='Reload this page to Run next Code'; this.disabled=true;" />
+        </div>
+        
+        <script>
+            window.onload = function()
+            {
+                
+            };
+        </script>
+    </body>
+</html>
